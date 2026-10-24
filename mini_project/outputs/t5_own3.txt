@@ -1,0 +1,4 @@
+$ ./calc3b < inputs/t4_own3.txt
+	push	4
+	pop	x
+syntax error

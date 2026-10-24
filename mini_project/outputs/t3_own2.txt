@@ -1,0 +1,2 @@
+$ ./calc2 < inputs/t3_own2.txt
+17

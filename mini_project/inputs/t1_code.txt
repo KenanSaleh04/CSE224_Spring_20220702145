@@ -1,0 +1,2 @@
+int my_var = count2 + 10;
+float _tmp = my_var * 3;

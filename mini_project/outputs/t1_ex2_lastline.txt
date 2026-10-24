@@ -1,0 +1,4 @@
+$ ./ex2 inputs/t1_lastline.txt
+   1	first line
+   2	second line
+last line has no newline

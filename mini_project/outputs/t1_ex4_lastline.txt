@@ -1,0 +1,2 @@
+$ ./ex4 < inputs/t1_lastline.txt
+47	9	2

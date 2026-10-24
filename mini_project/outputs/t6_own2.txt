@@ -1,0 +1,18 @@
+$ ./calc3g < inputs/t6_own2.txt
+
+
+Graph 0:
+
+           if
+           |
+     |--------------|
+     |        |     |
+    [>]     print print
+     |        |     |
+   |----|     |     |
+   |    |     |     |
+ id(X) c(0) id(X)  [_]
+                    |
+                    |
+                    |
+                  id(X)

@@ -1,0 +1,22 @@
+$ ./calc3b < inputs/t4_own1.txt
+	push	5
+	pop	n
+	push	1
+	pop	f
+L000:
+	push	n
+	push	1
+	compGT
+	jz	L001
+	push	f
+	push	n
+	mul
+	pop	f
+	push	n
+	push	1
+	sub
+	pop	n
+	jmp	L000
+L001:
+	push	f
+	print

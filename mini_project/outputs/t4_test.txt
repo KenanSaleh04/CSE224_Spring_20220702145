@@ -1,0 +1,5 @@
+$ ./calc3a < inputs/t4_test.txt
+0
+1
+2
+100

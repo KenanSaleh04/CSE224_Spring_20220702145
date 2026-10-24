@@ -1,0 +1,4 @@
+$ ./ex3mod < inputs/t1_code.txt
+  =  + 10;
+  =  * 3;
+number of identifiers = 6

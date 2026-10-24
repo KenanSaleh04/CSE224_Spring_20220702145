@@ -1,0 +1,2 @@
+$ ./calc3a < inputs/t4_own1.txt
+120

@@ -1,0 +1,2 @@
+$ ./calc3np < inputs/t7_given.txt
+7

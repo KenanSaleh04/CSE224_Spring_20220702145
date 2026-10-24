@@ -1,0 +1,2 @@
+$ ./calc3a < inputs/t4_own3.txt
+syntax error

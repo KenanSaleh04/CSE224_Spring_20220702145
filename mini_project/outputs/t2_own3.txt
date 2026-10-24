@@ -1,0 +1,3 @@
+$ ./calc1 < inputs/t2_own3.txt
+invalid character
+syntax error

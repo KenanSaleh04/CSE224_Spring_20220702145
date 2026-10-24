@@ -1,0 +1,91 @@
+$ ./calc3t < inputs/t7_given.txt
+Starting parse
+Entering state 0
+Stack now 0
+Reducing stack by rule 3 (line 45):
+-> $$ = nterm function ()
+Entering state 2
+Stack now 0 2
+Reading a token
+Next token is token PRINT ()
+Shifting token PRINT ()
+Entering state 8
+Stack now 0 2 8
+Reading a token
+Next token is token INTEGER ()
+Shifting token INTEGER ()
+Entering state 4
+Stack now 0 2 8 4
+Reducing stack by rule 14 (line 65):
+   $1 = token INTEGER ()
+-> $$ = nterm expr ()
+Entering state 19
+Stack now 0 2 8 19
+Reading a token
+Next token is token '+' ()
+Shifting token '+' ()
+Entering state 30
+Stack now 0 2 8 19 30
+Reading a token
+Next token is token INTEGER ()
+Shifting token INTEGER ()
+Entering state 4
+Stack now 0 2 8 19 30 4
+Reducing stack by rule 14 (line 65):
+   $1 = token INTEGER ()
+-> $$ = nterm expr ()
+Entering state 48
+Stack now 0 2 8 19 30 48
+Reading a token
+Next token is token '*' ()
+Shifting token '*' ()
+Entering state 32
+Stack now 0 2 8 19 30 48 32
+Reading a token
+Next token is token INTEGER ()
+Shifting token INTEGER ()
+Entering state 4
+Stack now 0 2 8 19 30 48 32 4
+Reducing stack by rule 14 (line 65):
+   $1 = token INTEGER ()
+-> $$ = nterm expr ()
+Entering state 50
+Stack now 0 2 8 19 30 48 32 50
+Reducing stack by rule 19 (line 70):
+   $1 = nterm expr ()
+   $2 = token '*' ()
+   $3 = nterm expr ()
+-> $$ = nterm expr ()
+Entering state 48
+Stack now 0 2 8 19 30 48
+Reading a token
+Next token is token ';' ()
+Reducing stack by rule 17 (line 68):
+   $1 = nterm expr ()
+   $2 = token '+' ()
+   $3 = nterm expr ()
+-> $$ = nterm expr ()
+Entering state 19
+Stack now 0 2 8 19
+Next token is token ';' ()
+Shifting token ';' ()
+Entering state 38
+Stack now 0 2 8 19 38
+Reducing stack by rule 6 (line 51):
+   $1 = token PRINT ()
+   $2 = nterm expr ()
+   $3 = token ';' ()
+-> $$ = nterm stmt ()
+Entering state 13
+Stack now 0 2 13
+Reducing stack by rule 2 (line 44):
+   $1 = nterm function ()
+   $2 = nterm stmt ()
+7
+-> $$ = nterm function ()
+Entering state 2
+Stack now 0 2
+Reading a token
+Now at end of input.
+Reducing stack by rule 1 (line 40):
+   $1 = nterm function ()

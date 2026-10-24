@@ -1,0 +1,7 @@
+a = 1;
+b = 0;
+if (a) if (b) print 1; else print 2;
+if (b) print 3;
+print -3 * 2 + 10;
+print 7 / 2;
+print a != b;

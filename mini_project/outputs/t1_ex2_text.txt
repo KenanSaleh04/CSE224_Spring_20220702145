@@ -1,0 +1,4 @@
+$ ./ex2 inputs/t1_text.txt
+   1	Hello world from my Ubuntu VM
+   2	This is line two of the test file
+   3	lex counts words lines and chars

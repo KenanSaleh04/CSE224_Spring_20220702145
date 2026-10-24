@@ -1,0 +1,4 @@
+$ ./calc2 < inputs/t3_given.txt
+11
+24
+0
