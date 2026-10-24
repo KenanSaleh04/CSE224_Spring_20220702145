@@ -1,0 +1,5 @@
+$ ./calc3a < inputs/t4_own2.txt
+2
+4
+3
+1

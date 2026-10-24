@@ -1,0 +1,4 @@
+$ ./ex3 < inputs/t1_code.txt
+ _ =  + 10;
+ _ = _ * 3;
+number of identifiers = 8

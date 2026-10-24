@@ -1,0 +1,27 @@
+$ ./calc3b < inputs/t4_test.txt
+	push	0
+	pop	x
+L000:
+	push	x
+	push	3
+	compLT
+	jz	L001
+	push	x
+	print
+	push	x
+	push	1
+	add
+	pop	x
+	jmp	L000
+L001:
+	push	x
+	push	3
+	compEQ
+	jz	L002
+	push	100
+	print
+	jmp	L003
+L002:
+	push	200
+	print
+L003:

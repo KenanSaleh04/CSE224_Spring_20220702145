@@ -1,0 +1,91 @@
+#include <stdio.h>
+#include "calc4.h"
+#include "y.tab.h"
+
+static int lbl;
+
+int ex(nodeType *p) {
+    int lbl1, lbl2;
+
+    if (!p) return 0;
+    switch(p->type) {
+    case typeCon:
+        printf("\tpush\t%d\n", p->con.value);
+        break;
+    case typeId:
+        printf("\tpush\t%s\n", sym[p->id.i].name);
+        break;
+    case typeOpr:
+        switch(p->opr.oper) {
+        case WHILE:
+            printf("L%03d:\n", lbl1 = lbl++);
+            ex(p->opr.op[0]);
+            printf("\tjz\tL%03d\n", lbl2 = lbl++);
+            ex(p->opr.op[1]);
+            printf("\tjmp\tL%03d\n", lbl1);
+            printf("L%03d:\n", lbl2);
+            break;
+        case DO:
+            printf("L%03d:\n", lbl1 = lbl++);
+            ex(p->opr.op[0]);
+            ex(p->opr.op[1]);
+            printf("\tjnz\tL%03d\n", lbl1);
+            break;
+        case FOR:
+            ex(p->opr.op[0]);
+            printf("L%03d:\n", lbl1 = lbl++);
+            ex(p->opr.op[1]);
+            printf("\tjz\tL%03d\n", lbl2 = lbl++);
+            ex(p->opr.op[3]);
+            ex(p->opr.op[2]);
+            printf("\tjmp\tL%03d\n", lbl1);
+            printf("L%03d:\n", lbl2);
+            break;
+        case IF:
+            ex(p->opr.op[0]);
+            if (p->opr.nops > 2) {
+                printf("\tjz\tL%03d\n", lbl1 = lbl++);
+                ex(p->opr.op[1]);
+                printf("\tjmp\tL%03d\n", lbl2 = lbl++);
+                printf("L%03d:\n", lbl1);
+                ex(p->opr.op[2]);
+                printf("L%03d:\n", lbl2);
+            } else {
+                printf("\tjz\tL%03d\n", lbl1 = lbl++);
+                ex(p->opr.op[1]);
+                printf("L%03d:\n", lbl1);
+            }
+            break;
+        case PRINT:
+            ex(p->opr.op[0]);
+            printf("\tprint\n");
+            break;
+        case '=':
+            ex(p->opr.op[1]);
+            printf("\tpop\t%s\n", sym[p->opr.op[0]->id.i].name);
+            break;
+        case UMINUS:
+            ex(p->opr.op[0]);
+            printf("\tneg\n");
+            break;
+        default:
+            ex(p->opr.op[0]);
+            ex(p->opr.op[1]);
+            switch(p->opr.oper) {
+            case '+':   printf("\tadd\n"); break;
+            case '-':   printf("\tsub\n"); break;
+            case '*':   printf("\tmul\n"); break;
+            case '/':   printf("\tdiv\n"); break;
+            case '%':   printf("\tmod\n"); break;
+            case '^':   printf("\tpow\n"); break;
+            case '<':   printf("\tcompLT\n"); break;
+            case '>':   printf("\tcompGT\n"); break;
+            case GE:    printf("\tcompGE\n"); break;
+            case LE:    printf("\tcompLE\n"); break;
+            case NE:    printf("\tcompNE\n"); break;
+            case EQ:    printf("\tcompEQ\n"); break;
+            }
+        }
+    }
+    return 0;
+}

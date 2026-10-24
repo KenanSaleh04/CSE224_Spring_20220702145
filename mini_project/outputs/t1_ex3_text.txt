@@ -1,0 +1,5 @@
+$ ./ex3 < inputs/t1_text.txt
+     
+       
+     
+number of identifiers = 20

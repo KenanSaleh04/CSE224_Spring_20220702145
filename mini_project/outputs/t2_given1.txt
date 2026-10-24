@@ -1,0 +1,2 @@
+$ ./calc1 < inputs/t2_given1.txt
+3

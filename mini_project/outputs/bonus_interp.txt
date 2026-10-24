@@ -1,0 +1,9 @@
+$ ./calc4a < inputs/bonus_test.txt
+15
+3
+2
+1
+2
+512
+-4
+3

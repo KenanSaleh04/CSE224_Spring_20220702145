@@ -1,0 +1,5 @@
+$ ./calc3np < inputs/t7_own.txt
+8
+9
+1
+-7

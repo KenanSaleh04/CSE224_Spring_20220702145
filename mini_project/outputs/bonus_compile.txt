@@ -1,0 +1,56 @@
+$ ./calc4b < inputs/bonus_test.txt
+	push	0
+	pop	total
+	push	1
+	pop	i
+L000:
+	push	i
+	push	5
+	compLE
+	jz	L001
+	push	total
+	push	i
+	add
+	pop	total
+	push	i
+	push	1
+	add
+	pop	i
+	jmp	L000
+L001:
+	push	total
+	print
+	push	3
+	pop	count
+L002:
+	push	count
+	print
+	push	count
+	push	1
+	sub
+	pop	count
+	push	count
+	push	0
+	compGT
+	jnz	L002
+	push	17
+	push	5
+	mod
+	print
+	push	2
+	push	3
+	push	2
+	pow
+	pow
+	print
+	push	2
+	push	2
+	pow
+	neg
+	print
+	push	10
+	push	4
+	sub
+	push	3
+	sub
+	print

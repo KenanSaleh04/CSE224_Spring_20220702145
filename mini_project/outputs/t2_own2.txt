@@ -1,0 +1,3 @@
+$ ./calc1 < inputs/t2_own2.txt
+7
+-1

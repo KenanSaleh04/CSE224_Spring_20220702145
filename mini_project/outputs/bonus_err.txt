@@ -1,0 +1,3 @@
+$ ./calc4a < inputs/bonus_err.txt
+10
+line 3: syntax error near ';'
