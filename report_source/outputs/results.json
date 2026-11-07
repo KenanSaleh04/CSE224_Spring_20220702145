@@ -1,0 +1,592 @@
+{
+  "source": "fetch_ucirepo(id=352) -> https://archive.ics.uci.edu/static/public/352/data.csv",
+  "raw_rows": 541909,
+  "date_min": "2010-12-01 08:26:00",
+  "date_max": "2011-12-09 12:50:00",
+  "missing_customer": 135080,
+  "missing_description": 1454,
+  "raw_invoices": 25900,
+  "raw_countries": 38,
+  "lines_per_invoice_median": 10.0,
+  "extreme_orders": [
+    {
+      "invoice": "541431",
+      "qty": 74215,
+      "value": 77183.6,
+      "date": "2011-01-18"
+    },
+    {
+      "invoice": "C541433",
+      "qty": -74215,
+      "value": -77183.6,
+      "date": "2011-01-18"
+    },
+    {
+      "invoice": "578841",
+      "qty": 12540,
+      "value": 0.0,
+      "date": "2011-11-25"
+    },
+    {
+      "invoice": "581483",
+      "qty": 80995,
+      "value": 168469.6,
+      "date": "2011-12-09"
+    },
+    {
+      "invoice": "C581484",
+      "qty": -80995,
+      "value": -168469.6,
+      "date": "2011-12-09"
+    }
+  ],
+  "retained_rows": 536465,
+  "excluded_rows": 5444,
+  "excluded_by_rule": {
+    "R3 non-merchandise code (postage, fees, manual, discount, samples, vouchers)": 2927,
+    "R1 zero/negative unit price (stock adjustments, bad-debt write-offs)": 2517
+  },
+  "duplicate_rows": 5268,
+  "credit_lines_raw": 9288,
+  "retained_credit_lines": 8704,
+  "retained_missing_customer": 131586,
+  "zero_price": 2515,
+  "negative_price": 2,
+  "neg_qty_noncredit": 1336,
+  "non_merch_rows": 2927,
+  "complete_months": [
+    "2010-12",
+    "2011-01",
+    "2011-02",
+    "2011-03",
+    "2011-04",
+    "2011-05",
+    "2011-06",
+    "2011-07",
+    "2011-08",
+    "2011-09",
+    "2011-10",
+    "2011-11"
+  ],
+  "n_complete": 12,
+  "y_mean": 779278.5310833334,
+  "y_median": 713787.505,
+  "y_min": 482901.211,
+  "y_min_month": "2011-04",
+  "y_max": 1432734.99,
+  "y_max_month": "2011-11",
+  "y_cv": 34.577298279998764,
+  "y_total_complete": 9351342.373000002,
+  "eligible_invoices": 23195,
+  "eligible_sales_invoices": 19773,
+  "eligible_credit_invoices": 3422,
+  "monthly": {
+    "2010-12": {
+      "lines": 42013.0,
+      "sales_invoices": 1550.0,
+      "credit_invoices": 301.0,
+      "invoice_days": 20.0,
+      "known_customers": 947.0,
+      "positive_sales": 777931.77,
+      "credit_magnitude": 17607.86,
+      "net_sales": 760323.91,
+      "net_per_invoice_day": 38016.1955,
+      "complete": true
+    },
+    "2011-01": {
+      "lines": 34827.0,
+      "sales_invoices": 1081.0,
+      "credit_invoices": 247.0,
+      "invoice_days": 24.0,
+      "known_customers": 780.0,
+      "positive_sales": 671933.1900000001,
+      "credit_magnitude": 91526.29999999999,
+      "net_sales": 580406.89,
+      "net_per_invoice_day": 24183.62041666667,
+      "complete": true
+    },
+    "2011-02": {
+      "lines": 27382.0,
+      "sales_invoices": 1093.0,
+      "credit_invoices": 191.0,
+      "invoice_days": 24.0,
+      "known_customers": 791.0,
+      "positive_sales": 508886.2,
+      "credit_magnitude": 8375.87,
+      "net_sales": 500510.33,
+      "net_per_invoice_day": 20854.597083333334,
+      "complete": true
+    },
+    "2011-03": {
+      "lines": 36249.0,
+      "sales_invoices": 1440.0,
+      "credit_invoices": 281.0,
+      "invoice_days": 27.0,
+      "known_customers": 1017.0,
+      "positive_sales": 691257.61,
+      "credit_magnitude": 10675.3,
+      "net_sales": 680582.31,
+      "net_per_invoice_day": 25206.752222222225,
+      "complete": true
+    },
+    "2011-04": {
+      "lines": 29488.0,
+      "sales_invoices": 1235.0,
+      "credit_invoices": 220.0,
+      "invoice_days": 21.0,
+      "known_customers": 896.0,
+      "positive_sales": 516218.121,
+      "credit_magnitude": 33316.91,
+      "net_sales": 482901.211,
+      "net_per_invoice_day": 22995.295761904763,
+      "complete": true
+    },
+    "2011-05": {
+      "lines": 36537.0,
+      "sales_invoices": 1668.0,
+      "credit_invoices": 267.0,
+      "invoice_days": 25.0,
+      "known_customers": 1076.0,
+      "positive_sales": 741192.41,
+      "credit_magnitude": 8948.23,
+      "net_sales": 732244.18,
+      "net_per_invoice_day": 29289.767200000002,
+      "complete": true
+    },
+    "2011-06": {
+      "lines": 36442.0,
+      "sales_invoices": 1525.0,
+      "credit_invoices": 299.0,
+      "invoice_days": 26.0,
+      "known_customers": 1049.0,
+      "positive_sales": 738751.87,
+      "credit_magnitude": 13760.84,
+      "net_sales": 724991.03,
+      "net_per_invoice_day": 27884.270384615385,
+      "complete": true
+    },
+    "2011-07": {
+      "lines": 39086.0,
+      "sales_invoices": 1452.0,
+      "credit_invoices": 236.0,
+      "invoice_days": 26.0,
+      "known_customers": 982.0,
+      "positive_sales": 689364.411,
+      "credit_magnitude": 11409.21,
+      "net_sales": 677955.201,
+      "net_per_invoice_day": 26075.20003846154,
+      "complete": true
+    },
+    "2011-08": {
+      "lines": 34943.0,
+      "sales_invoices": 1339.0,
+      "credit_invoices": 240.0,
+      "invoice_days": 26.0,
+      "known_customers": 977.0,
+      "positive_sales": 725513.5,
+      "credit_magnitude": 22929.520000000004,
+      "net_sales": 702583.98,
+      "net_per_invoice_day": 27022.46076923077,
+      "complete": true
+    },
+    "2011-09": {
+      "lines": 49817.0,
+      "sales_invoices": 1818.0,
+      "credit_invoices": 299.0,
+      "invoice_days": 26.0,
+      "known_customers": 1295.0,
+      "positive_sales": 1030475.361,
+      "credit_magnitude": 17044.68,
+      "net_sales": 1013430.681,
+      "net_per_invoice_day": 38978.10311538461,
+      "complete": true
+    },
+    "2011-10": {
+      "lines": 60194.0,
+      "sales_invoices": 2005.0,
+      "credit_invoices": 308.0,
+      "invoice_days": 26.0,
+      "known_customers": 1422.0,
+      "positive_sales": 1106669.82,
+      "credit_magnitude": 43992.16,
+      "net_sales": 1062677.66,
+      "net_per_invoice_day": 40872.21769230769,
+      "complete": true
+    },
+    "2011-11": {
+      "lines": 84108.0,
+      "sales_invoices": 2751.0,
+      "credit_invoices": 396.0,
+      "invoice_days": 26.0,
+      "known_customers": 1705.0,
+      "positive_sales": 1457745.53,
+      "credit_magnitude": 25010.54,
+      "net_sales": 1432734.99,
+      "net_per_invoice_day": 55105.19192307692,
+      "complete": true
+    },
+    "2011-12": {
+      "lines": 25379.0,
+      "sales_invoices": 816.0,
+      "credit_invoices": 137.0,
+      "invoice_days": 8.0,
+      "known_customers": 684.0,
+      "positive_sales": 615493.27,
+      "credit_magnitude": 174126.76,
+      "net_sales": 441366.51,
+      "net_per_invoice_day": 55170.81375,
+      "complete": false
+    }
+  },
+  "intl_share_avg": 15.777803085035567,
+  "intl_share_mar": 17.25443906997818,
+  "intl_share_apr": 9.796844348770954,
+  "intl_min_month": "2011-04",
+  "r_invoices_sales": 0.9722721952036057,
+  "worst_month": "2011-04",
+  "prev_month": "2011-03",
+  "worst_change": -197681.09900000005,
+  "worst_pct": -29.045876758095584,
+  "second_month": "2011-01",
+  "second_change": -179917.02000000002,
+  "second_pct": -23.663206908750247,
+  "n_declines": 5,
+  "n_comparisons": 11,
+  "mom": {
+    "2011-04": {
+      "change_gbp": -197681.09900000005,
+      "change_pct": -29.045876758095584
+    },
+    "2011-01": {
+      "change_gbp": -179917.02000000002,
+      "change_pct": -23.663206908750247
+    },
+    "2011-02": {
+      "change_gbp": -79896.56,
+      "change_pct": -13.76561191408324
+    },
+    "2011-07": {
+      "change_gbp": -47035.82900000003,
+      "change_pct": -6.487780821233061
+    },
+    "2011-06": {
+      "change_gbp": -7253.150000000023,
+      "change_pct": -0.9905370637428655
+    },
+    "2011-08": {
+      "change_gbp": 24628.77899999998,
+      "change_pct": 3.6328033126188792
+    },
+    "2011-10": {
+      "change_gbp": 49246.978999999934,
+      "change_pct": 4.859432413414365
+    },
+    "2011-03": {
+      "change_gbp": 180071.98000000004,
+      "change_pct": 35.977675026207756
+    },
+    "2011-05": {
+      "change_gbp": 249342.96900000004,
+      "change_pct": 51.63436399002943
+    },
+    "2011-09": {
+      "change_gbp": 310846.701,
+      "change_pct": 44.2433516630994
+    },
+    "2011-11": {
+      "change_gbp": 370057.3300000001,
+      "change_pct": 34.82310242599812
+    }
+  },
+  "days_prev": 27,
+  "days_worst": 21,
+  "no_invoice_dates": [
+    "2011-04-02",
+    "2011-04-09",
+    "2011-04-16",
+    "2011-04-22",
+    "2011-04-23",
+    "2011-04-24",
+    "2011-04-25",
+    "2011-04-29",
+    "2011-04-30"
+  ],
+  "perday_prev": 25206.752222222225,
+  "perday_worst": 22995.295761904763,
+  "perday_pct": -8.77327011755147,
+  "days_effect": -151240.51333333337,
+  "rate_effect": -46440.58566666671,
+  "pos_prev": 691257.61,
+  "pos_worst": 516218.121,
+  "cred_prev": 10675.3,
+  "cred_worst": 33316.91,
+  "inv_prev": 1440,
+  "inv_worst": 1235,
+  "lfl_2010": 402363.51,
+  "lfl_2011": 441366.5099999999,
+  "lfl_pct": 9.693473446436496,
+  "sensitivity": [
+    {
+      "scope": "Main scope (R1\u2013R3)",
+      "lines": 536465,
+      "largest decline": "Mar\u2192Apr 2011",
+      "change_gbp": -197681.09900000005,
+      "change_pct": -29.045876758095584,
+      "2nd largest": "Dec\u2192Jan 2011",
+      "gap_to_2nd_gbp": 17764.079000000027
+    },
+    {
+      "scope": "Main scope, repeated rows removed",
+      "lines": 531208,
+      "largest decline": "Mar\u2192Apr 2011",
+      "change_gbp": -197267.27899999998,
+      "change_pct": -29.0385392084053,
+      "2nd largest": "Dec\u2192Jan 2011",
+      "gap_to_2nd_gbp": 18031.968999999925
+    },
+    {
+      "scope": "Non-merchandise codes included",
+      "lines": 539392,
+      "largest decline": "Mar\u2192Apr 2011",
+      "change_gbp": -190059.95899999997,
+      "change_pct": -27.8163495012814,
+      "2nd largest": "Dec\u2192Jan 2011",
+      "gap_to_2nd_gbp": 1103.1989999999641
+    },
+    {
+      "scope": "Only lines with a CustomerID",
+      "lines": 404879,
+      "largest decline": "Mar\u2192Apr 2011",
+      "change_gbp": -152573.49899999995,
+      "change_pct": -26.55639248636855,
+      "2nd largest": "Dec\u2192Jan 2011",
+      "gap_to_2nd_gbp": 75221.239
+    }
+  ],
+  "sensitivity_same": true,
+  "inv_n": 18957,
+  "inv_q1": 152.63,
+  "inv_median": 302.72,
+  "inv_q3": 484.40000000000003,
+  "inv_p95": 1505.7320000000004,
+  "inv_mean": 509.3601199029382,
+  "inv_max": 77183.6,
+  "inv_large_share": 36.276715742773895,
+  "inv_by_month": {
+    "2011-03": {
+      "invoices": 1440.0,
+      "Q1": 150.10500000000002,
+      "median": 294.605,
+      "Q3": 475.32250000000005,
+      "P95": 1464.5544999999993,
+      "mean": 480.04000694444443,
+      "max": 21389.6,
+      "large_orders(>12m P95)": 71.0,
+      "large_order_value": 232008.78000000003,
+      "share_of_value_from_large_%": 33.56328764322754
+    },
+    "2011-04": {
+      "invoices": 1235.0,
+      "Q1": 151.525,
+      "median": 300.25,
+      "Q3": 451.59000000000003,
+      "P95": 1232.626,
+      "mean": 417.9903813765182,
+      "max": 21535.9,
+      "large_orders(>12m P95)": 42.0,
+      "large_order_value": 115549.55099999999,
+      "share_of_value_from_large_%": 22.383861840448642
+    }
+  },
+  "total_change": -197681.09900000005,
+  "n_countries_pair": 32,
+  "contrib": {
+    "United Kingdom": -127559.51900000003,
+    "Netherlands": -19319.929999999997,
+    "Australia": -17071.89,
+    "EIRE": -11012.73,
+    "France": -9850.689999999999,
+    "Denmark": -3978.9900000000002,
+    "Sweden": -3851.48,
+    "Finland": -3506.61,
+    "Channel Islands": -3266.33,
+    "Spain": -3092.9999999999995,
+    "Germany": -1774.6499999999996,
+    "Belgium": -1217.4299999999998,
+    "Cyprus": -974.1899999999999,
+    "Italy": -929.0800000000002,
+    "Portugal": -833.0999999999999,
+    "Austria": -723.3400000000001,
+    "Norway": -224.68,
+    "Canada": -140.54,
+    "Switzerland": -88.03999999999996,
+    "Czech Republic": -57.51,
+    "Saudi Arabia": 14.75,
+    "Israel": 110.0,
+    "Greece": 122.43,
+    "European Community": 155.4,
+    "Unspecified (unknown)": 299.1,
+    "USA": 383.95,
+    "Poland": 402.44999999999993,
+    "Iceland": 636.25,
+    "Brazil": 1143.6,
+    "Hong Kong": 1539.64,
+    "Singapore": 2118.74,
+    "Japan": 4866.32
+  },
+  "contrib_prev": {
+    "United Kingdom": 563151.65,
+    "Netherlands": 22206.489999999998,
+    "Australia": 17055.29,
+    "EIRE": 18283.23,
+    "France": 13616.9,
+    "Denmark": 3978.9900000000002,
+    "Sweden": 4500.58,
+    "Finland": 4853.42,
+    "Channel Islands": 3509.33,
+    "Spain": 4738.65,
+    "Germany": 12640.02,
+    "Belgium": 2976.58,
+    "Cyprus": 938.39,
+    "Italy": 1666.91,
+    "Portugal": 2520.85,
+    "Austria": 1308.1200000000001,
+    "Norway": 224.68,
+    "Canada": 140.54,
+    "Switzerland": 1590.23,
+    "Czech Republic": 0.0,
+    "Saudi Arabia": -14.75,
+    "Israel": 0.0,
+    "Greece": 387.31,
+    "European Community": 0.0,
+    "Unspecified (unknown)": 0.0,
+    "USA": 0.0,
+    "Poland": 303.39,
+    "Iceland": 0.0,
+    "Brazil": 0.0,
+    "Hong Kong": 0.0,
+    "Singapore": 0.0,
+    "Japan": 5.509999999999998
+  },
+  "contrib_worst": {
+    "United Kingdom": 435592.131,
+    "Netherlands": 2886.56,
+    "Australia": -16.599999999999966,
+    "EIRE": 7270.5,
+    "France": 3766.21,
+    "Denmark": 0.0,
+    "Sweden": 649.1,
+    "Finland": 1346.81,
+    "Channel Islands": 243.0,
+    "Spain": 1645.65,
+    "Germany": 10865.37,
+    "Belgium": 1759.15,
+    "Cyprus": -35.8,
+    "Italy": 737.8299999999999,
+    "Portugal": 1687.75,
+    "Austria": 584.78,
+    "Norway": 0.0,
+    "Canada": 0.0,
+    "Switzerland": 1502.19,
+    "Czech Republic": -57.51,
+    "Saudi Arabia": 0.0,
+    "Israel": 110.0,
+    "Greece": 509.74,
+    "European Community": 155.4,
+    "Unspecified (unknown)": 299.1,
+    "USA": 383.95,
+    "Poland": 705.8399999999999,
+    "Iceland": 636.25,
+    "Brazil": 1143.6,
+    "Hong Kong": 1539.64,
+    "Singapore": 2118.74,
+    "Japan": 4871.83
+  },
+  "one_month_only": [
+    "Denmark",
+    "Norway",
+    "Canada",
+    "Czech Republic",
+    "Saudi Arabia",
+    "Israel",
+    "European Community",
+    "Unspecified (unknown)",
+    "USA",
+    "Iceland",
+    "Brazil",
+    "Hong Kong",
+    "Singapore"
+  ],
+  "region": {
+    "International": {
+      "net_prev": 117430.66,
+      "net_worst": 47309.08,
+      "change_gbp": -70121.58,
+      "change_%": -59.71317882399707,
+      "share_of_change_%": 35.4720711057965,
+      "per_day_prev": 4349.283703703703,
+      "per_day_worst": 2252.8133333333335,
+      "per_day_change_%": -48.20265848799623
+    },
+    "United Kingdom": {
+      "net_prev": 563151.65,
+      "net_worst": 435592.131,
+      "change_gbp": -127559.51900000003,
+      "change_%": -22.651006882426795,
+      "share_of_change_%": 64.52792889420348,
+      "per_day_prev": 20857.46851851852,
+      "per_day_worst": 20742.482428571428,
+      "per_day_change_%": -0.5512945631201638
+    }
+  },
+  "top_intl": [
+    "Netherlands",
+    "Australia",
+    "EIRE",
+    "France"
+  ],
+  "top_intl_sum": -57255.23999999999,
+  "top_accounts": [
+    {
+      "country": "Netherlands",
+      "customer": "14646",
+      "prev": 21327.4,
+      "worst": 2886.56,
+      "change": -18440.84
+    },
+    {
+      "country": "Australia",
+      "customer": "12415",
+      "prev": 16558.14,
+      "worst": -425.0,
+      "change": -16983.14
+    },
+    {
+      "country": "EIRE",
+      "customer": "14156",
+      "prev": 9689.67,
+      "worst": 2898.1800000000003,
+      "change": -6791.49
+    },
+    {
+      "country": "France",
+      "customer": "12678",
+      "prev": 3243.13,
+      "worst": 0.0,
+      "change": -3243.13
+    },
+    {
+      "country": "EIRE",
+      "customer": "14911",
+      "prev": 6653.05,
+      "worst": 4372.32,
+      "change": -2280.7300000000005
+    }
+  ],
+  "generated_with": {
+    "python": "3.13.18",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3",
+    "matplotlib": "3.11.2"
+  }
+}

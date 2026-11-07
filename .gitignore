@@ -1,0 +1,5 @@
+# CSE464 case study: cached dataset and Python caches
+data/
+report_source/data/
+__pycache__/
+.ipynb_checkpoints/
