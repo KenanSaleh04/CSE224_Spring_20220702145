@@ -13,7 +13,7 @@ Submission files are in `../submission/`:
 | `build_notebook.py` | Writes the notebook (all cells) to `../submission/` |
 | `run_notebook.py` | Executes the notebook top to bottom and saves its outputs; creates `outputs/` |
 | `build_report.py` | Builds the DOCX and PDF; every number comes from `outputs/results.json` |
-| `assets/yeditepe_header.png` | University header taken from the course template |
+| `assets/yeditepe_logo_template.png` | University logo extracted from the original template PDF (page header) |
 | `outputs/` | Figures, `results.json`, monthly and country CSVs written by the notebook |
 
 ## Rebuild everything (local)

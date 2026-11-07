@@ -29,7 +29,7 @@ DOCX_OUT = HERE / "CSE464_Case_Study_1.docx"
 PDF_OUT = ROOT / "submission" / "CSE464_Case_Study_1.pdf"
 NOTEBOOK = "CSE464_Case_Study_1.ipynb"
 
-BLUE = RGBColor(0x2F, 0x4A, 0x8F)   # template heading blue
+BLUE = RGBColor(0x2F, 0x53, 0x96)   # template heading blue, measured from the template PDF
 INK = RGBColor(0x1A, 0x1A, 0x1A)
 GREY = RGBColor(0x55, 0x55, 0x55)
 BODY_FONT, HEAD_FONT = "Times New Roman", "Arial"
@@ -85,22 +85,27 @@ assert R["worst_month"] == "2011-04" and R["prev_month"] == "2011-03", "Text bel
 assert R["days_prev"] - R["days_worst"] == 6, "Text below says 'six fewer' invoice days"
 
 # ----------------------------------------------------------------------------- document helpers
+# Layout measured from the original CSE464_Case_Study_Template.pdf: US Letter, 1-inch side margins,
+# logo (258.7 pt wide) + "COMPUTER ENGINEERING DEPARTMENT" (Calibri Bold 12) as a header on every page,
+# section headings Arial Bold 20 pt #2F5396, lettered subsections Arial 16 pt #2F5396, body Times New Roman 12,
+# bullets Calibri 12 with a bold label.
 doc = Document()
 sec = doc.sections[0]
-sec.page_height, sec.page_width = Cm(29.7), Cm(21.0)
-for side in ("left_margin", "right_margin"):
-    setattr(sec, side, Cm(2.3))
-sec.top_margin, sec.bottom_margin = Cm(2.0), Cm(1.9)
+sec.page_width, sec.page_height = Pt(612), Pt(792)
+sec.left_margin = sec.right_margin = Pt(72)
+sec.top_margin, sec.bottom_margin = Pt(110), Pt(64)
+sec.header_distance, sec.footer_distance = Pt(35), Pt(30)
 
 normal = doc.styles["Normal"]
 normal.font.name = BODY_FONT
-normal.font.size = Pt(11)
+normal.font.size = Pt(12)
 normal.element.rPr.rFonts.set(qn("w:eastAsia"), BODY_FONT)
 normal.paragraph_format.space_after = Pt(4)
-normal.paragraph_format.line_spacing = 1.08
+normal.paragraph_format.line_spacing = 1.0
+BULLET_FONT = "Calibri"
 
 
-def add_runs(p, text, size=None, color=None, font=None, italic=False):
+def add_runs(p, text, size=None, color=None, font=None, italic=False, underline_bold=False):
     """Supports **bold** inline markup."""
     for i, part in enumerate(re.split(r"\*\*", text)):
         if not part:
@@ -108,6 +113,8 @@ def add_runs(p, text, size=None, color=None, font=None, italic=False):
         r = p.add_run(part)
         r.bold = (i % 2 == 1)
         r.italic = italic
+        if underline_bold and r.bold:
+            r.underline = True
         if size:
             r.font.size = Pt(size)
         if color is not None:
@@ -127,38 +134,36 @@ def para(text, align=WD_ALIGN_PARAGRAPH.JUSTIFY, size=None, after=4, italic=Fals
     return add_runs(p, text, size=size, italic=italic)
 
 
-def bullet(text, size=None):
+def bullet(text, size=12, underline_bold=False, keep=False):
     p = doc.add_paragraph(style="List Bullet")
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    p.paragraph_format.space_after = Pt(2)
-    p.paragraph_format.left_indent = Cm(0.9)
-    return add_runs(p, text, size=size)
+    p.paragraph_format.space_after = Pt(3)
+    p.paragraph_format.left_indent = Pt(36)        # text at 108 pt, bullet at 90 pt, as in the template
+    p.paragraph_format.first_line_indent = Pt(-18)
+    if keep:
+        p.paragraph_format.keep_with_next = True
+    return add_runs(p, text, size=size, font=BULLET_FONT, underline_bold=underline_bold)
 
 
 def section(num, title):
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(12)
-    p.paragraph_format.space_after = Pt(5)
-    p.paragraph_format.left_indent = Cm(0.9)
+    p.paragraph_format.space_after = Pt(6)
+    p.paragraph_format.left_indent = Pt(27)        # numeral at 99 pt
     p.paragraph_format.keep_with_next = True
-    p.paragraph_format.tab_stops.add_tab_stop(Cm(2.4))
-    add_runs(p, f"**{num}\t{title}**", size=17, color=BLUE, font=HEAD_FONT)
+    p.paragraph_format.tab_stops.add_tab_stop(Pt(72))  # title at 144 pt
+    add_runs(p, f"**{num}\t{title}**", size=20, color=BLUE, font=HEAD_FONT)
 
 
 def sub(letter, title):
     p = doc.add_paragraph()
-    p.paragraph_format.space_before = Pt(7)
-    p.paragraph_format.space_after = Pt(3)
+    p.paragraph_format.space_before = Pt(8)
+    p.paragraph_format.space_after = Pt(4)
+    p.paragraph_format.left_indent = Pt(36)        # label at 108 pt
+    p.paragraph_format.first_line_indent = Pt(-18) # letter at 90 pt
+    p.paragraph_format.tab_stops.add_tab_stop(Pt(36))
     p.paragraph_format.keep_with_next = True
-    add_runs(p, f"**{letter}. {title}**", size=13, color=BLUE, font=HEAD_FONT)
-
-
-def run_in(label):
-    """Bold blue run-in label used for the unlettered template bullets."""
-    p = doc.add_paragraph()
-    p.paragraph_format.space_after = Pt(3)
-    p.paragraph_format.keep_with_next = True
-    add_runs(p, f"**{label}**", size=11.5, color=BLUE, font=HEAD_FONT)
+    add_runs(p, f"{letter}.\t**{title}**", size=16, color=BLUE, font=HEAD_FONT)
 
 
 def shade(cell, hex_fill):
@@ -222,15 +227,25 @@ def figure(name, width_cm, caption):
     p.add_run().add_picture(str(FIG / f"{name}.png"), width=Cm(width_cm))
     cap = doc.add_paragraph()
     cap.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    cap.paragraph_format.space_after = Pt(5)
+    cap.paragraph_format.space_after = Pt(6)
     add_runs(cap, caption, size=9.5, color=GREY, font=HEAD_FONT)
 
 
-def page_number_footer(section_obj):
-    p = section_obj.footer.paragraphs[0]
+def fill_header(header):
+    """Template page header: university logo centred above the department name."""
+    p = header.paragraphs[0]
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run("CSE464 Case Study 1 – Kenan Saleh (20220702115)  |  Page ")
-    r.font.size = Pt(8.5); r.font.color.rgb = GREY; r.font.name = HEAD_FONT
+    p.paragraph_format.space_after = Pt(17)
+    p.add_run().add_picture(str(HERE / "assets" / "yeditepe_logo_template.png"), width=Pt(258.7))
+    q = header.add_paragraph()
+    q.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    q.paragraph_format.space_after = Pt(0)
+    add_runs(q, "**COMPUTER ENGINEERING DEPARTMENT**", size=12, font="Calibri", color=RGBColor(0, 0, 0))
+
+
+def page_number_footer(footer):
+    p = footer.paragraphs[0]
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run = p.add_run()
     for tag, txt in (("begin", None), (None, "PAGE"), ("end", None)):
         if tag:
@@ -238,78 +253,79 @@ def page_number_footer(section_obj):
         else:
             el = OxmlElement("w:instrText"); el.set(qn("xml:space"), "preserve"); el.text = txt
         run._r.append(el)
-    run.font.size = Pt(8.5); run.font.color.rgb = GREY; run.font.name = HEAD_FONT
+    run.font.size = Pt(9); run.font.color.rgb = GREY; run.font.name = "Calibri"
 
 
-# ----------------------------------------------------------------------------- cover page
-sec.different_first_page_header_footer = True
-p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p.paragraph_format.space_before = Pt(6)
-p.add_run().add_picture(str(HERE / "assets" / "yeditepe_header.png"), width=Cm(9.6))
-p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p.paragraph_format.space_before = Pt(10)
-add_runs(p, "**COMPUTER ENGINEERING DEPARTMENT**", size=11.5, font="Calibri")
+# ----------------------------------------------------------------------------- header, footer and cover page
+sec.different_first_page_header_footer = True   # same header on the cover, but no page number there
+fill_header(sec.header)
+fill_header(sec.first_page_header)
+page_number_footer(sec.footer)
 
-for _ in range(5):
-    doc.add_paragraph()
+BLACK = RGBColor(0, 0, 0)
+spacer = doc.add_paragraph(); spacer.paragraph_format.space_before = Pt(118)  # template title sits at ~245 pt
 p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-add_runs(p, "**CSE464 – Introduction to Data Science & Big Data Analytics**", size=14, color=BLUE, font=HEAD_FONT)
+p.paragraph_format.space_after = Pt(14)
+add_runs(p, "**CSE464 Case Study 1**", size=20, font="Calibri", color=BLACK)
 p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-add_runs(p, "**Case Study 1**", size=22, color=BLUE, font=HEAD_FONT)
+p.paragraph_format.space_after = Pt(0)
+add_runs(p, "**INTRODUCTION TO DATA SCIENCE & BIG DATA ANALYTICS**", size=14, font="Calibri", color=BLACK)
 p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p.paragraph_format.space_before = Pt(6)
-add_runs(p, "Where Did April 2011 Sales Go?", size=17, font=HEAD_FONT, color=INK)
-p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-add_runs(p, "A Descriptive Review of Monthly Net Sales for a UK Online Gift Retailer", size=13, font=HEAD_FONT, color=GREY)
-p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p.paragraph_format.space_before = Pt(10)
-add_runs(p, "Selected issue 1(b)(ii): Sales figures / company KPIs below targeted rates", size=11.5, italic=True)
+add_runs(p, "**(FALL SEMESTER 2026)**", size=14, font="Calibri", color=BLACK)
 
-for _ in range(6):
-    doc.add_paragraph()
+p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p.paragraph_format.space_before = Pt(60)
+p.paragraph_format.space_after = Pt(2)
+add_runs(p, "Where Did April 2011 Sales Go?", size=16, font="Calibri", color=BLACK)
+p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+add_runs(p, "A descriptive review of monthly net sales for a UK online gift retailer", size=12, font="Calibri", color=GREY)
+p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p.paragraph_format.space_before = Pt(4)
+add_runs(p, "Selected issue 1(b)(ii): Sales figures / Company KPIs", size=12, font="Calibri", color=BLACK, italic=True)
+
+spacer = doc.add_paragraph(); spacer.paragraph_format.space_before = Pt(70)
 cover_rows = [
     ("Student", "Kenan Saleh"),
     ("Student number", "20220702115"),
-    ("Course", "CSE464 – Introduction to Data Science & Big Data Analytics"),
     ("Semester", "Fall 2026"),
     ("Dataset", "UCI Online Retail (ID 352), DOI 10.24432/C5BW33"),
-    ("Analysis notebook", f"{NOTEBOOK} (Google Colab; Python, NumPy, pandas, matplotlib)"),
+    ("Analysis notebook", f"{NOTEBOOK} (Python, NumPy, pandas, matplotlib)"),
 ]
 t = doc.add_table(rows=len(cover_rows), cols=2)
 t.alignment = WD_TABLE_ALIGNMENT.CENTER
 for i, (k, v) in enumerate(cover_rows):
     for j, val in enumerate((k, v)):
-        c = t.cell(i, j); c.width = Cm(4.2 if j == 0 else 10.6); c.text = ""
-        add_runs(c.paragraphs[0], f"**{val}**" if j == 0 else val, size=11, font=HEAD_FONT)
+        c = t.cell(i, j); c.text = ""
+        add_runs(c.paragraphs[0], f"**{val}**" if j == 0 else val, size=12, font="Calibri", color=BLACK)
         c.paragraphs[0].paragraph_format.space_after = Pt(3)
-fix_widths(t, [4.2, 11.4])
+fix_widths(t, [4.0, 11.0])
 doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
-page_number_footer(sec)
 
 # ----------------------------------------------------------------------------- I. Executive summary
 section("I.", "Executive Summary/Abstract")
-para(f"**Challenge.** Management reports that sales and company KPIs are far below target and needs a decision "
-     f"within three weeks. The real targets are not available, so this study uses the preceding complete month as a "
-     f"**historical benchmark** and asks: “Across complete calendar months, when did net invoiced sales fall most, "
-     f"which countries accounted for the change, and what should management investigate first?”")
-para(f"**Finding.** Using the company's own {R['raw_rows']:,} invoice lines (UCI Online Retail), the largest "
-     f"month-to-month fall in net invoiced merchandise sales was **March → April 2011: {gbp(R['worst_change'])} "
-     f"({pct(R['worst_pct'])})**, from {gbp(mar['net_sales'])} to {gbp(apr['net_sales'])}, the lowest of the "
-     f"{R['n_complete']} complete months. April had six fewer days with recorded invoices "
-     f"({R['days_worst']} against {R['days_prev']}). Valued at March's net sales per invoice day "
-     f"({gbp(R['perday_prev'])}), those six days correspond arithmetically to {gbp(R['days_effect'])}, about "
-     f"{days_share:.0f}% of the decline; the records do not show why no invoices were recorded on them. "
-     f"On the same two bases (denominators: {R['days_prev']} March and {R['days_worst']} April invoice days), UK net sales "
-     f"fell {pct(uk['change_%'], signed=False)} for the whole month but {pct(uk['per_day_change_%'], signed=False)} per "
-     f"invoice day, while international net sales fell {pct(intl['change_%'], signed=False)} for the whole month and "
-     f"{pct(intl['per_day_change_%'], signed=False)} per invoice day. A few large accounts in the Netherlands, Australia, "
-     f"EIRE and France ordered less in April ({gbp(R['top_intl_sum'])} together). The typical order did not shrink (median "
-     f"{gbp(bm_mar['median'])} → {gbp(bm_apr['median'])}); there were fewer orders and fewer very large ones.")
-para(f"**Outcome and proposed action.** The records point first to the missing invoice days and to lower international "
-     f"orders; they do not show why either happened. Management should (1) have Finance confirm the April 2011 trading "
-     f"calendar, then (2) have the Head of Sales review the international wholesale accounts that ordered less in April, "
-     f"following the proposed three-week timeline. The KPI to monitor is **net invoiced "
-     f"sales per invoice day, split UK vs international**. All results come from the executed notebook {NOTEBOOK}.")
+para(f"**Challenge.** This study addresses issue 1(b)(ii) of the assignment: sales figures and company KPIs are far below "
+     f"target, and management needs a decision within three weeks. The real targets are not available, so the preceding "
+     f"complete month is used as a **historical benchmark**. The question is: “Across complete calendar months, when did "
+     f"net invoiced sales fall most, which countries accounted for the change, and what should management investigate first?”")
+para(f"**Solution.** As the company's data scientist, I analysed its own {R['raw_rows']:,} invoice lines (UCI Online Retail, "
+     f"1 December 2010 – 9 December 2011) with descriptive analytics in Python. I cleaned the records, built a monthly net-sales "
+     f"KPI and applied three methods: a month-to-month comparison, a distribution of order values and a country contribution "
+     f"breakdown. The partial month December 2011 (1–9 December) was not compared with full months.")
+para(f"**Outcome.** The largest fall was **March → April 2011: {gbp(R['worst_change'])} ({pct(R['worst_pct'])})**, from "
+     f"{gbp(mar['net_sales'])} to {gbp(apr['net_sales'])}. April had {R['days_worst']} days with recorded invoices, compared "
+     f"with {R['days_prev']} in March. At March's rate of {gbp(R['perday_prev'])} per invoice day, the six missing days "
+     f"correspond arithmetically to {gbp(R['days_effect'])}, about {days_share:.0f}% of the decline; the records do not show "
+     f"why no invoices were recorded on those days. Measured on the same two bases, UK net sales fell "
+     f"{pct(uk['change_%'], signed=False)} for the whole month and {pct(uk['per_day_change_%'], signed=False)} per invoice "
+     f"day, while international net sales fell {pct(intl['change_%'], signed=False)} for the whole month and "
+     f"{pct(intl['per_day_change_%'], signed=False)} per invoice day (per-day values divide by {R['days_prev']} and "
+     f"{R['days_worst']} days). Accounts in the Netherlands, Australia, EIRE and France ordered less in April "
+     f"({gbp(R['top_intl_sum'])} together). The median order hardly changed ({gbp(bm_mar['median'])} → "
+     f"{gbp(bm_apr['median'])}); there were {R['inv_prev'] - R['inv_worst']:,} fewer orders.")
+para(f"**Proposed action.** Finance should first confirm the April 2011 trading calendar. The Head of Sales should then "
+     f"review the international wholesale accounts that ordered less in April, following the proposed three-week "
+     f"implementation plan (Table 4). The KPI to monitor is **net invoiced sales per invoice day, split UK vs "
+     f"international**. All results come from the executed notebook {NOTEBOOK}.")
 
 # ----------------------------------------------------------------------------- II. Background
 section("II.", "Background/Introduction")
@@ -337,7 +353,10 @@ para(f"Sales are reported to be far below target, but management does not know w
      f"and is treated as partial. **Benchmark:** the preceding complete month (a historical comparison, not a management "
      f"target). **Decision:** which issue management should investigate first within the three-week deadline.")
 sub("B", "Why It Matters")
-para("If a calendar effect is read as a demand problem, or the other way round, the company will act on the wrong thing. "
+para("The assignment brief describes a company that is starting to compete with its existing products and services. "
+     "Sales of those existing products are the most direct measure of whether that strategy is working, so a shortfall in "
+     "the sales KPI is a strategic problem, not only an accounting one. "
+     "If a calendar effect is read as a demand problem, or the other way round, the company will act on the wrong thing. "
      "It might redesign products or cut prices when the decline is concentrated in a few accounts that ordered less. Time "
      "and budget should go where sales were actually lower. The records can "
      "show **when** sales fell, **by how much**, **in which countries and accounts**, and whether the cause was fewer orders, "
@@ -346,7 +365,7 @@ para("If a calendar effect is read as a demand problem, or the other way round, 
 
 # ----------------------------------------------------------------------------- IV. Solution
 section("IV.", "Solution/Approach")
-run_in("Why a descriptive analytics approach")
+bullet("**Use of descriptive analytics, and why**", underline_bold=True, keep=True)
 para("The question is about what already happened, and the data are one year of historical invoices with no outcome "
      "variable to predict. Descriptive analytics (cleaning, aggregation, summary statistics and charts) answers it directly "
      "and gives results that executives can check by hand. A predictive model would need several years of data to learn "
@@ -390,14 +409,14 @@ para(f"Steps 1–2 load the data ({R['raw_rows']:,} rows, 8 columns) and profile
 # ----------------------------------------------------------------------------- V. Results
 section("V.", "Results/Outcomes")
 sub("F", "Quantifiable Results")
-figure("fig1_monthly_net_sales", 15.2,
+figure("fig1_monthly_net_sales", 13.6,
        f"Figure 1. Monthly net invoiced sales (GBP, merchandise lines), December 2010 – December 2011. December 2011 covers "
        f"1–9 December only (hatched) and is not ranked. Source: notebook Step 5.")
 para(f"**Method A – time series.** Of {R['n_comparisons']} comparisons between adjacent complete months, "
      f"{R['n_declines']} were declines. The largest was **March → April 2011, {gbp(R['worst_change'])} "
      f"({pct(R['worst_pct'])})**, ahead of December 2010 → January 2011 ({gbp(R['second_change'])}, "
-     f"{pct(R['second_pct'])}), the post-Christmas fall. April had {R['days_worst']} days with recorded invoices against "
-     f"{R['days_prev']}: none is dated 22–25 April or 29–30 April. These dates coincide with the 2011 Easter weekend and "
+     f"{pct(R['second_pct'])}), the post-Christmas fall. April had {R['days_worst']} days with recorded invoices, compared "
+     f"with {R['days_prev']} in March; no invoice is dated 22–25 April or 29–30 April. These dates coincide with the 2011 Easter weekend and "
      f"the 29 April royal-wedding bank holiday [3], but the records do not show whether the business was closed. Net sales "
      f"per invoice day fell {pct(R['perday_pct'], signed=False)} ({gbp(R['perday_prev'])} → {gbp(R['perday_worst'])}). "
      f"Valuing the six missing days at March's daily rate gives {gbp(R['days_effect'])} (about {days_share:.0f}% of the "
@@ -428,13 +447,13 @@ para(f"**Method B – order values.** Across {R['inv_n']:,} sales invoices in th
      f"order in April was the same as in March. The fall came from {R['inv_prev'] - R['inv_worst']:,} fewer orders and "
      f"from large orders: their value fell by {kgbp(abs(large_drop))} ({gbp(bm_mar['large_order_value'])} → "
      f"{gbp(bm_apr['large_order_value'])}).")
-figure("fig5_invoice_value_distribution", 14.8,
+figure("fig5_invoice_value_distribution", 13.2,
        "Figure 2. Value per sales invoice by complete month (GBP, log scale; box = Q1–Q3, line = median, whiskers = 5th–95th "
        "percentile; dashed line = 12-month P95). March and April 2011 are dark blue. Source: notebook Step 6B.")
-figure("fig6_country_contributions", 14.6,
+figure("fig6_country_contributions", 12.8,
        f"Figure 3. Country contributions to the {gbp(R['total_change'])} change, March → April 2011 (GBP; red = decline, "
        f"blue = offset). The {R['n_countries_pair']} contributions sum exactly to the total. Source: notebook Step 6C.")
-para(f"**Method C – countries.** The United Kingdom contributed {gbp(uk['change_gbp'])} "
+para(f"**Method C – countries (Figure 3).** The United Kingdom contributed {gbp(uk['change_gbp'])} "
      f"({uk['share_of_change_%']:.0f}% of the fall): its whole-month net sales fell {pct(uk['change_%'], signed=False)}, "
      f"but per invoice day they changed by only {pct(uk['per_day_change_%'])} ({gbp(uk['per_day_prev'])} → "
      f"{gbp(uk['per_day_worst'])}). International customers made up only {R['intl_share_mar']:.0f}% of March sales, yet "
@@ -445,7 +464,7 @@ para(f"**Method C – countries.** The United Kingdom contributed {gbp(uk['chang
      f"customer 12415 ({gbp(acc['12415']['prev'])} → {gbp(acc['12415']['worst'])}, net of a credit). Japan "
      f"({sgbp(C['Japan'])}), Singapore ({sgbp(C['Singapore'])}) and Hong Kong ({sgbp(C['Hong Kong'])}) were small offsets. "
      f"Countries present in only one month are included with zero for the other month.")
-figure("fig2_region_monthly", 14.6,
+figure("fig2_region_monthly", 12.8,
        f"Figure 4. Net invoiced sales by region (GBP), complete months December 2010 – November 2011. Source: notebook Step 5.")
 para(f"Figure 4 puts April in context. International net sales reached their lowest complete month in April 2011 "
      f"({gbp(intl['net_worst'])}, {R['intl_share_apr']:.1f}% of net sales against an average share of "
@@ -470,7 +489,8 @@ table([
 sub("G", "Qualitative Impact")
 para("Management can now see that the worst month of the year coincides with six fewer days with recorded invoices and "
      "with lower orders from a short list of international wholesale accounts that can be named and contacted. UK net sales "
-     "per invoice day changed little, although the records cannot show whether UK demand itself changed. "
+     f"per invoice day changed by {pct(uk['per_day_change_%'])} ({gbp(uk['per_day_prev'])} → {gbp(uk['per_day_worst'])}), "
+     "although the records cannot show whether UK demand itself changed. "
      "This turns a general worry about low KPIs into a specific, checkable list of questions. The cleaned and reconciled KPI "
      "also gives a common, auditable definition of 'sales' for future reviews, and partial months and calendar gaps can be "
      "separated from performance changes before decisions are made. No customer feedback, satisfaction, savings or revenue gain was measured. These are "
@@ -543,6 +563,13 @@ for ref in [
 
 doc.core_properties.title = "CSE464 Case Study 1 – Kenan Saleh"
 doc.core_properties.author = "Kenan Saleh"
+doc.core_properties.comments = ""
+doc.core_properties.subject = "CSE464 Case Study 1"
+doc.core_properties.keywords = ""
+doc.core_properties.last_modified_by = "Kenan Saleh"
+import datetime as _dt
+doc.core_properties.created = doc.core_properties.modified = _dt.datetime.now(_dt.timezone.utc).replace(microsecond=0, tzinfo=None)
+doc.core_properties.revision = 1
 doc.save(DOCX_OUT)
 print("Saved", DOCX_OUT)
 

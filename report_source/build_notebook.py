@@ -37,8 +37,8 @@ preceding month, which countries accounted for the change, and what should manag
 The preceding complete month is used only as a **historical benchmark** – the company's real targets, costs and
 margins are not in the data, so invoiced sales are never treated as profit.
 
-The notebook follows the nine steps of the course hand-out. It runs top to bottom in a fresh Google Colab
-runtime (Runtime ▸ Run all). It needs no Drive mount; it downloads the data from UCI and writes charts and a
+The notebook follows the nine steps of the course hand-out. It is written to run top to bottom in a fresh
+Google Colab runtime (Runtime ▸ Run all). It needs no Drive mount; it downloads the data from UCI and writes charts and a
 results file to a relative `outputs/` folder.
 """)
 
@@ -871,9 +871,9 @@ rose and fell. It cannot show the reasons.
 
 **Executive summary.** Management believes sales KPIs are below target (issue 1(b)(ii)). Across 12 complete
 months, the largest month-to-month fall in net invoiced merchandise sales was **March → April 2011: −£197,681
-(−29.0%)**, from £680,582 to £482,901. April had six fewer days with recorded invoices (21 vs 27). Valued at March's
-net sales per invoice day, those six days correspond arithmetically to about 77% of the decline (−£151,241); the records
-do not show why no invoices were recorded on them. On the same two bases, UK net sales fell 22.7% for the whole month
+(−29.0%)**, from £680,582 to £482,901. April had 21 days with recorded invoices, compared with 27 in March. At
+March's rate of £25,207 per invoice day, the six missing days correspond arithmetically to −£151,241, about 77% of the
+decline; the records do not show why no invoices were recorded on those days. On the same two bases, UK net sales fell 22.7% for the whole month
 but only 0.6% per invoice day, while international net sales fell 59.7% for the whole month and 48.2% per invoice day.
 A few large accounts in the Netherlands, Australia, EIRE and France ordered less in April (−£57,255 together). The
 typical order size did not change (median about £300).
@@ -906,6 +906,10 @@ md(r"""
 The real targets are not in the data, so this analysis uses the **preceding complete month as a historical
 benchmark**. KPI = monthly net invoiced merchandise sales (GBP). Period = the 12 complete months from
 December 2010 to November 2011 (December 2011 is partial).
+
+**Relation to the company's current strategy.** The assignment brief describes a company that is starting to compete
+with its existing products and services. Sales of those existing products are the most direct measure of whether that
+strategy is working, so a shortfall in the sales KPI (issue 1(b)(ii)) is a strategic problem, not only an accounting one.
 
 **Why it matters.** If the company misreads a calendar effect as a demand problem, or the reverse, it will take the
 wrong action. It could change products or prices when the decline is concentrated in a few accounts that ordered
@@ -945,7 +949,7 @@ better forecasts) is expected but **not measured** here. It should be confirmed 
 """)
 
 code(r"""
-R["generated_with"] = {"python": platform.python_version(), "pandas": pd.__version__,
+R["software_versions"] = {"python": platform.python_version(), "pandas": pd.__version__,
                        "numpy": np.__version__, "matplotlib": matplotlib.__version__}
 with open(OUT / "results.json", "w") as f:
     json.dump(R, f, indent=2, default=str)
