@@ -49,6 +49,10 @@
   "duplicate_rows": 5268,
   "credit_lines_raw": 9288,
   "retained_credit_lines": 8704,
+  "excluded_credit_lines": 584,
+  "credit_excluded_by_rule": {
+    "R3": 584
+  },
   "retained_missing_customer": 131586,
   "zero_price": 2515,
   "negative_price": 2,

@@ -312,10 +312,16 @@ print(f"Raw {n_raw:,} = retained {n_ret:,} + excluded {n_exc:,}  ✔")
 print(f"Retained lines with missing CustomerID: {eligible['CustomerID'].isna().sum():,} "
       f"(GBP {eligible.loc[eligible['CustomerID'].isna(), 'LineValue'].sum():,.0f}) – kept for the aggregate KPI")
 print(f"Retained credit-note lines: {eligible['IsCredit'].sum():,} – kept so that returns reduce net sales")
+cred_by_rule = df.loc[df["IsCredit"], "Exclusion"].value_counts()
+print(f"Credit-note lines: raw {df['IsCredit'].sum():,} = retained {cred_by_rule.get('Retained', 0):,} + excluded "
+      f"{df['IsCredit'].sum() - cred_by_rule.get('Retained', 0):,}; by rule:", cred_by_rule.to_dict())
+assert df["IsCredit"].sum() == cred_by_rule.sum()
 R.update(retained_rows=n_ret, excluded_rows=n_exc,
          excluded_by_rule={k: int(v) for k, v in recon["Invoice lines"].items() if k != "Retained"},
          duplicate_rows=int(dup_mask.sum()), credit_lines_raw=int(df["IsCredit"].sum()),
          retained_credit_lines=int(eligible["IsCredit"].sum()),
+         excluded_credit_lines=int(df["IsCredit"].sum() - eligible["IsCredit"].sum()),
+         credit_excluded_by_rule={k[:2]: int(v) for k, v in cred_by_rule.items() if k != "Retained"},
          retained_missing_customer=int(eligible["CustomerID"].isna().sum()),
          zero_price=int((df["UnitPrice"] == 0).sum()), negative_price=int((df["UnitPrice"] < 0).sum()),
          neg_qty_noncredit=int(neg_normal.sum()), non_merch_rows=int((df["Exclusion"].str.startswith("R3")).sum()))
@@ -595,7 +601,7 @@ print("Dates in", worst, "with no eligible invoice:", [d.strftime("%a %d %b") fo
 print("Weekdays present in the whole dataset:", sorted(sales["InvoiceDate"].dt.day_name().unique()))
 print(f"Net sales per invoice day: £{a['net_per_invoice_day']:,.0f} -> £{b['net_per_invoice_day']:,.0f} "
       f"({(b['net_per_invoice_day'] / a['net_per_invoice_day'] - 1) * 100:+.1f}%)")
-print(f"Arithmetic split of the {money(b['net_sales'] - a['net_sales'])} change: fewer invoice days {money(days_eff)} "
+print(f"Arithmetic split of the {money(b['net_sales'] - a['net_sales'])} change: six fewer invoice days valued at March's net sales per invoice day {money(days_eff)} "
       f"({days_eff / (b['net_sales'] - a['net_sales']) * 100:.0f}%), lower sales per invoice day {money(rate_eff)} "
       f"({rate_eff / (b['net_sales'] - a['net_sales']) * 100:.0f}%)")
 print(f"Positive sales £{a['positive_sales']:,.0f} -> £{b['positive_sales']:,.0f} ({money(b['positive_sales'] - a['positive_sales'])}); "
@@ -648,9 +654,10 @@ md(r"""
 **March → April 2011: −£197,681 (−29.0%)**, followed by December 2010 → January 2011 (−£179,917, −23.7%).
 April also had only 21 invoice days against 27 in March: no eligible invoice is dated 22–25 April or 29–30 April 2011
 (Saturdays never appear in the data). Net sales per invoice day fell by only 8.8% (£25,207 → £22,995).
-Arithmetically, about £151k of the decline comes with the six fewer invoice days and about £46k with lower daily
-sales. The 22–25 April dates were the 2011 Easter weekend, and 29 April 2011 was a bank holiday for the royal wedding,
-so the company's trading calendar should be checked first. The same March → April result appears under all four
+Valuing the six missing days at March's net sales per invoice day gives −£151,241, which corresponds arithmetically
+to about 77% of the decline; lower sales per invoice day account for the other −£46,441. The 22–25 April dates coincide
+with the 2011 Easter weekend and 29 April 2011 was a bank holiday for the royal wedding, but the records do not show
+whether the business was closed, so the company's own trading calendar should be checked first. The same March → April result appears under all four
 cleaning scopes. With non-merchandise codes included, however, January is only about £1.1k behind, so the ranking
 of the two biggest falls is close and depends on scope.
 Partial December 2011 is compared only with 1–9 December 2010 (+9.7%), never with full November.
@@ -812,17 +819,20 @@ ax.set_xlabel(f"Change in net sales, {prev_p.strftime('%B')} → {worst.strftime
 ax.set_title(f"Country contributions to the {money(total_change/1000, 1)}k change (red = decline, blue = offset)", loc="left", fontsize=10)
 save(fig, "fig6_country_contributions")
 uk = reg_tab.loc["United Kingdom"]; it = reg_tab.loc["International"]
-print(f"Interpretation: the UK contributed {money(uk['change_gbp'])} ({uk['share_of_change_%']:.0f}%) but its net sales per invoice day "
-      f"changed only {uk['per_day_change_%']:+.1f}%; international net sales fell {abs(it['change_%']):.1f}% "
-      f"(£{it['net_prev']:,.0f} -> £{it['net_worst']:,.0f}), {it['per_day_change_%']:+.1f}% per invoice day.")
+d0, d1 = int(monthly.loc[prev_p, "invoice_days"]), int(monthly.loc[worst, "invoice_days"])
+for name, r in (("UK", uk), ("International", it)):
+    print(f"{name}: whole month {money(r['net_prev'])} -> {money(r['net_worst'])} ({r['change_%']:+.1f}%); "
+          f"per invoice day {money(r['net_prev'])}/{d0} = {money(r['per_day_prev'])} -> {money(r['net_worst'])}/{d1} = "
+          f"{money(r['per_day_worst'])} ({r['per_day_change_%']:+.1f}%); share of total change {r['share_of_change_%']:.0f}%")
 """)
 
 md(r"""
 **Method C result.** All 32 countries reconcile exactly to the −£197,681 change. The United Kingdom contributed
-−£127,560 (65%), but measured per invoice day its net sales were almost flat (£20,857 → £20,742, −0.6%).
-International customers contributed −£70,122 (35%) even though they were only 17% of March sales: their net sales
-fell by 59.7% (−48.2% per invoice day). Four countries – the Netherlands (−£19,320), Australia (−£17,072),
-EIRE (−£11,013) and France (−£9,851) – account for −£57,255, or 29% of the total decline. Most of this came from a few large accounts
+−£127,560 (65%): its whole-month net sales fell 22.7%, but per invoice day they changed by only −0.6%
+(£563,152 / 27 days = £20,857 → £435,592 / 21 days = £20,742). International customers contributed −£70,122 (35%)
+even though they were only 17% of March sales: their whole-month net sales fell 59.7%, and per invoice day they fell
+48.2% (£4,349 → £2,253, same 27- and 21-day denominators). Four countries – the Netherlands (−£19,320), Australia (−£17,072),
+EIRE (−£11,013) and France (−£9,851) – account for −£57,255, or 29% of the total decline. Most of this came from a few large accounts that ordered less in April
 (e.g., Netherlands customer 14646: £21,327 → £2,887; Australia customer 12415: £16,558 → −£425).
 Small offsets came from Japan (+£4,866), Singapore (+£2,119) and Hong Kong (+£1,540).
 
@@ -840,8 +850,10 @@ methods = pd.DataFrame([
      f"sales invoices {R['inv_prev']:,}→{R['inv_worst']:,}",
      "Invoice ≠ customer; credits not matched to original orders"],
     ["C. Country contribution", "Shows where the change came from; sums exactly to the total",
-     f"UK {money(R['region']['United Kingdom']['change_gbp'])}; International {money(R['region']['International']['change_gbp'])} "
-     f"({R['region']['International']['change_%']:.1f}%)",
+     f"UK {money(R['region']['United Kingdom']['change_gbp'])} (month {R['region']['United Kingdom']['change_%']:+.1f}%, "
+     f"per invoice day {R['region']['United Kingdom']['per_day_change_%']:+.1f}%); International "
+     f"{money(R['region']['International']['change_gbp'])} (month {R['region']['International']['change_%']:+.1f}%, "
+     f"per invoice day {R['region']['International']['per_day_change_%']:+.1f}%)",
      "Shows where, not why; a few accounts can dominate a country"],
 ], columns=["Method", "Why chosen", "Computed result", "Limitation"])
 display(methods)
@@ -859,13 +871,15 @@ rose and fell. It cannot show the reasons.
 
 **Executive summary.** Management believes sales KPIs are below target (issue 1(b)(ii)). Across 12 complete
 months, the largest month-to-month fall in net invoiced merchandise sales was **March → April 2011: −£197,681
-(−29.0%)**, from £680,582 to £482,901. About three quarters of that fall (£151k) lines up with April having six fewer invoice days
-(21 vs 27, with gaps over Easter and the 29 April bank holiday). Per invoice day, UK sales were nearly flat
-(−0.6%), while international sales fell 59.7% in total, led by a few large accounts in the Netherlands,
-Australia, EIRE and France (−£57,255 together). The typical order size did not change (median about £300).
-**Proposed action:** before treating April as a demand collapse, the sales team should check the April trading
-calendar and then review the lapsed international wholesale accounts. Sales per invoice day for UK and
-international customers should be tracked as a monthly KPI.
+(−29.0%)**, from £680,582 to £482,901. April had six fewer days with recorded invoices (21 vs 27). Valued at March's
+net sales per invoice day, those six days correspond arithmetically to about 77% of the decline (−£151,241); the records
+do not show why no invoices were recorded on them. On the same two bases, UK net sales fell 22.7% for the whole month
+but only 0.6% per invoice day, while international net sales fell 59.7% for the whole month and 48.2% per invoice day.
+A few large accounts in the Netherlands, Australia, EIRE and France ordered less in April (−£57,255 together). The
+typical order size did not change (median about £300).
+**Proposed action:** the sales team should first check the April trading calendar and then review the international
+wholesale accounts that ordered less in April. Net sales per invoice day for UK and international customers should be
+tracked as a monthly KPI.
 """)
 
 code(r"""
@@ -875,8 +889,9 @@ key = pd.Series({
     "Largest complete-month decline": f"{R['prev_month']} -> {R['worst_month']}: {money(R['worst_change'])} ({R['worst_pct']:+.1f}%)",
     "Invoice days (Mar / Apr)": f"{R['days_prev']} / {R['days_worst']}",
     "Net sales per invoice day change": f"{R['perday_pct']:+.1f}%",
-    "UK change, GBP (per-invoice-day %)": f"{money(R['region']['United Kingdom']['change_gbp'])} ({R['region']['United Kingdom']['per_day_change_%']:+.1f}%)",
-    "International change, GBP (per-invoice-day %)": f"{money(R['region']['International']['change_gbp'])} ({R['region']['International']['per_day_change_%']:+.1f}%)",
+    "UK change: GBP, whole-month %, per-invoice-day %": f"{money(R['region']['United Kingdom']['change_gbp'])}, {R['region']['United Kingdom']['change_%']:+.1f}%, {R['region']['United Kingdom']['per_day_change_%']:+.1f}%",
+    "International change: GBP, whole-month %, per-invoice-day %": f"{money(R['region']['International']['change_gbp'])}, {R['region']['International']['change_%']:+.1f}%, {R['region']['International']['per_day_change_%']:+.1f}%",
+    "Credit-note lines raw / retained": f"{R['credit_lines_raw']:,} / {R['retained_credit_lines']:,}",
     "Top-4 international countries": f"{', '.join(R['top_intl'])}: {money(R['top_intl_sum'])}",
     "Median order Mar / Apr": f"£{R['inv_by_month'][R['prev_month']]['median']:,.0f} / £{R['inv_by_month'][R['worst_month']]['median']:,.0f}",
 })
@@ -893,8 +908,8 @@ benchmark**. KPI = monthly net invoiced merchandise sales (GBP). Period = the 12
 December 2010 to November 2011 (December 2011 is partial).
 
 **Why it matters.** If the company misreads a calendar effect as a demand problem, or the reverse, it will take the
-wrong action. It could change products or prices when a few key accounts have actually stopped ordering. Competitors
-are already copying early product ideas, so management needs to know quickly *where* sales were lost.
+wrong action. It could change products or prices when the decline is concentrated in a few accounts that ordered
+less. Management therefore needs to know *where* sales were lower before it acts.
 
 **What the records can establish.** When sales fell, by how much, in which countries and accounts, and whether the
 cause was fewer orders, smaller orders or more credits. **What they cannot establish:** targets, margins or profit,
@@ -907,17 +922,18 @@ md(r"""
 
 **Completed analysis (this notebook).** Cleaned and reconciled the full UCI log, built the monthly net-sales KPI,
 and applied three descriptive methods (time-series comparison, order-value distribution, country contribution).
-All three point to the same answer: the March → April 2011 fall comes with fewer invoice days and with lost
-international wholesale volume. Order size did not change.
+All three point the same way: the March → April 2011 fall coincides with fewer days with recorded invoices and with
+lower international wholesale orders. The median order size did not change.
 
 **Priority recommendation.** *The Head of Sales, with the international account managers, should review the
-international wholesale accounts whose April 2011 orders collapsed, starting with the four largest contributors
-(Netherlands, Australia, EIRE, France). Before that, Finance should confirm the April trading calendar.*
+international wholesale accounts that ordered less in April 2011, starting with the four largest country contributors
+(Netherlands, Australia, EIRE, France). Before that, Finance should confirm the April trading calendar.* The timeline
+below is a proposed management schedule, not a completed result.
 
 | When | Who | What | Output |
 |---|---|---|---|
 | Week 1 | Finance + Sales operations | Confirm whether 22–25 and 29–30 April 2011 were non-trading days. List April credit notes (£33,317 vs £10,675 in March) | Calendar-adjusted April baseline |
-| Week 2 | Head of Sales + account managers | Contact the lapsed accounts (e.g., NL 14646, AU 12415, EIRE 14156/14911). Record why orders stopped (stock, price, competitor, timing) | Account-by-account reasons |
+| Week 2 | Head of Sales + account managers | Contact the accounts that ordered less (e.g., NL 14646, AU 12415, EIRE 14156/14911). Record why April orders were lower (stock, price, timing, other) | Account-by-account reasons |
 | Week 3 | Executive management | Decide on recovery actions per account. Approve the KPI below | Decision memo |
 | Monthly, from then on | Sales operations | Review the KPI on the first working day of each month | KPI dashboard |
 

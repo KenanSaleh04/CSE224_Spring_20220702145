@@ -82,6 +82,7 @@ jar = [e for e in R["extreme_orders"] if e["date"].startswith("2011-01") and e["
 bird = [e for e in R["extreme_orders"] if e["date"].startswith("2011-12") and e["value"] > 0][0]
 assert R["sensitivity_same"], "Conclusion changes across cleaning scopes – review the text before building"
 assert R["worst_month"] == "2011-04" and R["prev_month"] == "2011-03", "Text below is written for March→April 2011"
+assert R["days_prev"] - R["days_worst"] == 6, "Text below says 'six fewer' invoice days"
 
 # ----------------------------------------------------------------------------- document helpers
 doc = Document()
@@ -289,21 +290,25 @@ page_number_footer(sec)
 section("I.", "Executive Summary/Abstract")
 para(f"**Challenge.** Management reports that sales and company KPIs are far below target and needs a decision "
      f"within three weeks. The real targets are not available, so this study uses the preceding complete month as a "
-     f"**historical benchmark** and asks: *across complete calendar months, when did net invoiced sales fall most, "
-     f"which countries accounted for the change, and what should management investigate first?*")
+     f"**historical benchmark** and asks: “Across complete calendar months, when did net invoiced sales fall most, "
+     f"which countries accounted for the change, and what should management investigate first?”")
 para(f"**Finding.** Using the company's own {R['raw_rows']:,} invoice lines (UCI Online Retail), the largest "
      f"month-to-month fall in net invoiced merchandise sales was **March → April 2011: {gbp(R['worst_change'])} "
      f"({pct(R['worst_pct'])})**, from {gbp(mar['net_sales'])} to {gbp(apr['net_sales'])}, the lowest of the "
-     f"{R['n_complete']} complete months. April had only {R['days_worst']} invoice days against {R['days_prev']} in March "
-     f"(no invoices over Easter or on the 29 April bank holiday), and this accounts arithmetically for "
-     f"{kgbp(R['days_effect'])} ({days_share:.0f}%) of the fall. Per invoice day, UK sales were almost flat "
-     f"({pct(uk['per_day_change_%'])}), whereas international sales fell {pct(intl['change_%'], signed=False)} "
-     f"({gbp(intl['change_gbp'])}), mostly because a few large accounts in the Netherlands, Australia, EIRE and France "
-     f"ordered much less ({gbp(R['top_intl_sum'])} together). The typical order did not shrink (median "
+     f"{R['n_complete']} complete months. April had six fewer days with recorded invoices "
+     f"({R['days_worst']} against {R['days_prev']}). Valued at March's net sales per invoice day "
+     f"({gbp(R['perday_prev'])}), those six days correspond arithmetically to {gbp(R['days_effect'])}, about "
+     f"{days_share:.0f}% of the decline; the records do not show why no invoices were recorded on them. "
+     f"On the same two bases (denominators: {R['days_prev']} March and {R['days_worst']} April invoice days), UK net sales "
+     f"fell {pct(uk['change_%'], signed=False)} for the whole month but {pct(uk['per_day_change_%'], signed=False)} per "
+     f"invoice day, while international net sales fell {pct(intl['change_%'], signed=False)} for the whole month and "
+     f"{pct(intl['per_day_change_%'], signed=False)} per invoice day. A few large accounts in the Netherlands, Australia, "
+     f"EIRE and France ordered less in April ({gbp(R['top_intl_sum'])} together). The typical order did not shrink (median "
      f"{gbp(bm_mar['median'])} → {gbp(bm_apr['median'])}); there were fewer orders and fewer very large ones.")
-para(f"**Outcome and proposed action.** The April fall was not a general drop in UK demand. Management should "
-     f"(1) have Finance confirm the April 2011 trading calendar, then (2) have the Head of Sales review the international "
-     f"wholesale accounts whose orders collapsed, within the three-week window. The KPI to monitor is **net invoiced "
+para(f"**Outcome and proposed action.** The records point first to the missing invoice days and to lower international "
+     f"orders; they do not show why either happened. Management should (1) have Finance confirm the April 2011 trading "
+     f"calendar, then (2) have the Head of Sales review the international wholesale accounts that ordered less in April, "
+     f"following the proposed three-week timeline. The KPI to monitor is **net invoiced "
      f"sales per invoice day, split UK vs international**. All results come from the executed notebook {NOTEBOOK}.")
 
 # ----------------------------------------------------------------------------- II. Background
@@ -317,8 +322,8 @@ bullet(f"**About the Client/Company:** The client is an unnamed UK-based, regist
 bullet("**Industry Context:** Online gift retail sells to both small shops (wholesale) and consumers. Demand is seasonal and "
        f"builds before Christmas: in this data, monthly net sales rose from {gbp(M['2011-08']['net_sales'])} in August to "
        f"{gbp(M['2011-11']['net_sales'])} in November 2011. Wholesale buying is lumpy: the top 5% of orders (above "
-       f"{gbp(R['inv_p95'])}) bring {R['inv_large_share']:.1f}% of order value, so losing one account can move a whole month. "
-       "The hand-out also notes that competitors have copied the firm's early product ideas.")
+       f"{gbp(R['inv_p95'])}) bring {R['inv_large_share']:.1f}% of order value, so a change in one account's orders can "
+       "move a whole month.")
 bullet("**Goals and Objectives:** The company wants to bring sales back toward its targets. The objectives of this study are to "
        "(1) build a reliable monthly net-sales KPI from the raw records, (2) find the largest fall between complete months, "
        "(3) show where that fall came from, and (4) recommend what management should investigate first.")
@@ -333,8 +338,8 @@ para(f"Sales are reported to be far below target, but management does not know w
      f"target). **Decision:** which issue management should investigate first within the three-week deadline.")
 sub("B", "Why It Matters")
 para("If a calendar effect is read as a demand problem, or the other way round, the company will act on the wrong thing. "
-     "It might redesign products or cut prices when the real issue is that a few key accounts stopped ordering. Competitors "
-     "are already copying early product ideas, so time and budget should go where sales were actually lost. The records can "
+     "It might redesign products or cut prices when the decline is concentrated in a few accounts that ordered less. Time "
+     "and budget should go where sales were actually lower. The records can "
      "show **when** sales fell, **by how much**, **in which countries and accounts**, and whether the cause was fewer orders, "
      "smaller orders or more credits. They cannot show targets, costs, margins or profit, or **why** customers changed "
      "their behaviour. Those questions need input from the sales team and from the customers.")
@@ -391,10 +396,12 @@ figure("fig1_monthly_net_sales", 15.2,
 para(f"**Method A – time series.** Of {R['n_comparisons']} comparisons between adjacent complete months, "
      f"{R['n_declines']} were declines. The largest was **March → April 2011, {gbp(R['worst_change'])} "
      f"({pct(R['worst_pct'])})**, ahead of December 2010 → January 2011 ({gbp(R['second_change'])}, "
-     f"{pct(R['second_pct'])}), which is the usual post-Christmas fall. April had {R['days_worst']} invoice days against "
-     f"{R['days_prev']}: no invoice is dated 22–25 April (Easter 2011) or 29–30 April (29 April was a bank holiday for "
-     f"the royal wedding [3]). Net sales per invoice day fell only {pct(R['perday_pct'], signed=False)} "
-     f"({gbp(R['perday_prev'])} → {gbp(R['perday_worst'])}). The ranking stays the same when repeated rows are removed or "
+     f"{pct(R['second_pct'])}), the post-Christmas fall. April had {R['days_worst']} days with recorded invoices against "
+     f"{R['days_prev']}: none is dated 22–25 April or 29–30 April. These dates coincide with the 2011 Easter weekend and "
+     f"the 29 April royal-wedding bank holiday [3], but the records do not show whether the business was closed. Net sales "
+     f"per invoice day fell {pct(R['perday_pct'], signed=False)} ({gbp(R['perday_prev'])} → {gbp(R['perday_worst'])}). "
+     f"Valuing the six missing days at March's daily rate gives {gbp(R['days_effect'])} (about {days_share:.0f}% of the "
+     f"decline, arithmetic only); lower sales per invoice day account for the other {gbp(R['rate_effect'])}. The ranking stays the same when repeated rows are removed or "
      f"only lines with a CustomerID are used. When postage and fee codes are added back, January comes within "
      f"{gbp(nonmerch_scope['gap_to_2nd_gbp'])} of April. For partial December 2011, the like-for-like 1–9 December "
      f"comparison is {pct(R['lfl_pct'])} against 2010.")
@@ -409,9 +416,12 @@ table([
     ["Median order value", gbp(bm_mar["median"]), gbp(bm_apr["median"]), sgbp(bm_apr["median"] - bm_mar["median"])],
     [f"Orders above 12-month P95 ({gbp(R['inv_p95'])})", f"{int(bm_mar['large_orders(>12m P95)'])}",
      f"{int(bm_apr['large_orders(>12m P95)'])}", sint(bm_apr['large_orders(>12m P95)'] - bm_mar['large_orders(>12m P95)'])],
+    ["UK net sales, whole month", gbp(uk["net_prev"]), gbp(uk["net_worst"]), pct(uk["change_%"])],
     ["UK net sales per invoice day", gbp(uk["per_day_prev"]), gbp(uk["per_day_worst"]), pct(uk["per_day_change_%"])],
-    ["International net sales", gbp(intl["net_prev"]), gbp(intl["net_worst"]), pct(intl["change_%"])],
-], widths=[6.4, 2.9, 2.9, 4.1], caption="Table 2. March vs April 2011, all values in GBP unless stated", right_cols=(1, 2, 3))
+    ["International net sales, whole month", gbp(intl["net_prev"]), gbp(intl["net_worst"]), pct(intl["change_%"])],
+    ["International net sales per invoice day", gbp(intl["per_day_prev"]), gbp(intl["per_day_worst"]), pct(intl["per_day_change_%"])],
+], widths=[6.4, 2.9, 2.9, 4.1], caption=f"Table 2. March vs April 2011, all values in GBP unless stated. Per-invoice-day "
+   f"values divide by all invoice days in the month ({R['days_prev']} and {R['days_worst']}).", right_cols=(1, 2, 3))
 para(f"**Method B – order values.** Across {R['inv_n']:,} sales invoices in the complete months, the median order was "
      f"{gbp(R['inv_median'])} and half of all orders lay between {gbp(R['inv_q1'])} and {gbp(R['inv_q3'])}. The mean "
      f"({gbp(R['inv_mean'])}) sits above the median because of the long upper tail. Figure 2 shows that the typical "
@@ -425,12 +435,13 @@ figure("fig6_country_contributions", 14.6,
        f"Figure 3. Country contributions to the {gbp(R['total_change'])} change, March → April 2011 (GBP; red = decline, "
        f"blue = offset). The {R['n_countries_pair']} contributions sum exactly to the total. Source: notebook Step 6C.")
 para(f"**Method C – countries.** The United Kingdom contributed {gbp(uk['change_gbp'])} "
-     f"({uk['share_of_change_%']:.0f}% of the fall), but its net sales per invoice day were almost unchanged "
-     f"({gbp(uk['per_day_prev'])} → {gbp(uk['per_day_worst'])}). International customers made up only "
-     f"{R['intl_share_mar']:.0f}% of March sales, yet they contributed {gbp(intl['change_gbp'])} "
-     f"({intl['share_of_change_%']:.0f}%). The Netherlands ({gbp(C['Netherlands'])}), Australia ({gbp(C['Australia'])}), "
-     f"EIRE ({gbp(C['EIRE'])}) and France ({gbp(C['France'])}) explain {gbp(R['top_intl_sum'])}. These falls trace back to a "
-     f"few accounts: Netherlands customer 14646 ({gbp(acc['14646']['prev'])} → {gbp(acc['14646']['worst'])}) and Australia "
+     f"({uk['share_of_change_%']:.0f}% of the fall): its whole-month net sales fell {pct(uk['change_%'], signed=False)}, "
+     f"but per invoice day they changed by only {pct(uk['per_day_change_%'])} ({gbp(uk['per_day_prev'])} → "
+     f"{gbp(uk['per_day_worst'])}). International customers made up only {R['intl_share_mar']:.0f}% of March sales, yet "
+     f"they contributed {gbp(intl['change_gbp'])} ({intl['share_of_change_%']:.0f}%): {pct(intl['change_%'], signed=False)} "
+     f"for the whole month and {pct(intl['per_day_change_%'], signed=False)} per invoice day. The Netherlands ({gbp(C['Netherlands'])}), Australia ({gbp(C['Australia'])}), "
+     f"EIRE ({gbp(C['EIRE'])}) and France ({gbp(C['France'])}) explain {gbp(R['top_intl_sum'])}. Most of these decreases come from a "
+     f"few accounts that ordered less in April: Netherlands customer 14646 ({gbp(acc['14646']['prev'])} → {gbp(acc['14646']['worst'])}) and Australia "
      f"customer 12415 ({gbp(acc['12415']['prev'])} → {gbp(acc['12415']['worst'])}, net of a credit). Japan "
      f"({sgbp(C['Japan'])}), Singapore ({sgbp(C['Singapore'])}) and Hong Kong ({sgbp(C['Hong Kong'])}) were small offsets. "
      f"Countries present in only one month are included with zero for the other month.")
@@ -438,9 +449,10 @@ figure("fig2_region_monthly", 14.6,
        f"Figure 4. Net invoiced sales by region (GBP), complete months December 2010 – November 2011. Source: notebook Step 5.")
 para(f"Figure 4 puts April in context. International net sales reached their lowest complete month in April 2011 "
      f"({gbp(intl['net_worst'])}, {R['intl_share_apr']:.1f}% of net sales against an average share of "
-     f"{R['intl_share_avg']:.1f}%) and recovered in May. The UK line dips in April but, per invoice day, stays level. "
+     f"{R['intl_share_avg']:.1f}%) and were higher again in May. The UK line dips in April; per invoice day it changed "
+     f"by {pct(uk['per_day_change_%'])}. "
      f"Over the 12 complete months, the number of sales invoices and net sales move together closely (r = "
-     f"{R['r_invoices_sales']:.2f}), which is consistent with order volume, not order size, driving the KPI.")
+     f"{R['r_invoices_sales']:.2f}): the KPI tracks order volume more closely than order size.")
 table([
     ["Method", "Why it was chosen", "Computed result", "One limitation"],
     ["A. Time-series comparison", "The question asks when sales fell between adjacent complete months",
@@ -451,47 +463,54 @@ table([
      f"large orders {int(bm_mar['large_orders(>12m P95)'])} → {int(bm_apr['large_orders(>12m P95)'])}",
      "An invoice is not a customer; credits are not matched to the order they reverse"],
     ["C. Country contribution", "Shows where the change came from; contributions sum exactly to the total",
-     f"UK {gbp(uk['change_gbp'])} ({pct(uk['per_day_change_%'])} per day); international {gbp(intl['change_gbp'])} "
-     f"({pct(intl['change_%'])})",
+     f"UK {gbp(uk['change_gbp'])} (month {pct(uk['change_%'])}; per invoice day {pct(uk['per_day_change_%'])}); "
+     f"international {gbp(intl['change_gbp'])} (month {pct(intl['change_%'])}; per invoice day {pct(intl['per_day_change_%'])})",
      "Shows where, not why; one large account can dominate a country"],
-], widths=[3.2, 4.3, 5.0, 3.8], caption="Table 4. The three descriptive methods: reason, result and limitation (notebook Step 6)")
+], widths=[3.2, 4.3, 5.0, 3.8], caption="Table 3. The three descriptive methods: reason, result and limitation (notebook Step 6)")
 sub("G", "Qualitative Impact")
-para("Management can now see that the worst month of the year was not a broad collapse of UK demand. It came from fewer "
-     "invoice days plus lost volume from a short list of international wholesale accounts that can be named and contacted. "
+para("Management can now see that the worst month of the year coincides with six fewer days with recorded invoices and "
+     "with lower orders from a short list of international wholesale accounts that can be named and contacted. UK net sales "
+     "per invoice day changed little, although the records cannot show whether UK demand itself changed. "
      "This turns a general worry about low KPIs into a specific, checkable list of questions. The cleaned and reconciled KPI "
-     "also gives a common, auditable definition of 'sales' for future reviews. Partial months and calendar gaps are no longer "
-     "mistaken for performance changes. No customer feedback, satisfaction, savings or revenue gain was measured. These are "
+     "also gives a common, auditable definition of 'sales' for future reviews, and partial months and calendar gaps can be "
+     "separated from performance changes before decisions are made. No customer feedback, satisfaction, savings or revenue gain was measured. These are "
      "possible future benefits of the proposed action, not results of this study.")
 
 # ----------------------------------------------------------------------------- VI. Recommendations
 section("VI.", "Recommendations")
 para("**Priority recommendation.** The Head of Sales and the international account managers should review the international "
-     "wholesale accounts whose April 2011 orders collapsed, starting with the four largest contributors (Table 3). Before "
-     "that, Finance should confirm the trading calendar, so that the review starts from a calendar-adjusted baseline. This is "
-     "a proposed business action. Its benefits have not been measured and must be tracked with the KPI below.")
+     "wholesale accounts that ordered less in April 2011, starting with the four largest country contributors in Figure 3 "
+     "(Netherlands, Australia, EIRE and France). Before that, Finance should confirm the trading calendar, so that the review "
+     "starts from a calendar-adjusted baseline. Table 4 gives a proposed three-week management timeline. This is a proposed "
+     "business action; its benefits have not been measured and must be tracked with the KPI in Table 4.")
 table([
     ["When", "Who", "What to investigate", "Output"],
     ["Week 1", "Finance and sales operations",
      f"Were 22–25 and 29–30 April 2011 non-trading days? Why did credits rise from {gbp(mar['credit_magnitude'])} to "
      f"{gbp(apr['credit_magnitude'])}?", "Calendar-adjusted April baseline"],
     ["Week 2", "Head of Sales, account managers",
-     "Contact accounts NL 14646, AU 12415, EIRE 14156 and 14911, and the main French accounts. Why did orders stop "
-     "(stock, price, competitor, timing)?", "Reasons, account by account"],
+     "Contact accounts NL 14646, AU 12415, EIRE 14156 and 14911, and the main French accounts. Why were their April "
+     "orders lower (stock, price, timing, other)?", "Reasons, account by account"],
     ["Week 3", "Executive management", "Decide recovery actions per account; approve the KPI", "Decision memo"],
     ["Monthly", "Sales operations", "Net sales per invoice day, UK vs international; credits as % of positive sales",
      "KPI review on 1st working day"],
-], widths=[1.6, 3.6, 7.6, 3.5], caption="Table 3. Implementation plan and metric to monitor")
+], widths=[1.6, 3.6, 7.6, 3.5], caption="Table 4. Proposed implementation timeline and metric to monitor")
 sub("H", "Key Takeaways")
-bullet("**Normalise before comparing.** Always compare complete months and also check sales per invoice day. Six fewer "
-       f"invoice days account arithmetically for about {days_share:.0f}% of the April fall.")
+bullet("**Normalise before comparing.** Always compare complete months and also check sales per invoice day. Valued at "
+       f"March's daily rate, April's six fewer days with recorded invoices correspond arithmetically to about "
+       f"{days_share:.0f}% of the fall.")
 bullet("**Large accounts carry concentrated risk.** The top 5% of orders bring "
        f"{R['inv_large_share']:.0f}% of value, and four international countries explain {abs(R['top_intl_sum'] / R['total_change'] * 100):.0f}% "
-       "of the worst fall. Account retention matters more than order size, because the median order did not change.")
+       "of the worst fall. Because the median order did not change, account-level order counts are the first thing to check.")
 bullet("**Contributions must add up.** A signed country breakdown that reconciles to the total shows clearly where the money "
        "moved, and it is easy for executives to audit.")
 sub("I", "Challenges Overcome")
-bullet(f"**Credits and adjustments:** {R['credit_lines_raw']:,} credit-note lines were kept and counted once as negative "
-       f"values. {R['zero_price'] + R['negative_price']:,} zero- or negative-price adjustment lines were excluded. Two huge "
+bullet(f"**Credits and adjustments:** the raw data contained {R['credit_lines_raw']:,} credit-note lines. "
+       f"{R['retained_credit_lines']:,} met the merchandise eligibility rules and were kept, each counted once as a negative "
+       f"value (Table 1); the other {R['excluded_credit_lines']:,} were excluded "
+       + (f"by R3 because they carry non-merchandise codes. " if list(R['credit_excluded_by_rule']) == ['R3'] else
+          f"({'; '.join(f'{n:,} by {k}' for k, n in sorted(R['credit_excluded_by_rule'].items()))}). ")
+       + f"{R['zero_price'] + R['negative_price']:,} zero- or negative-price adjustment lines were excluded by R1. Two huge "
        f"orders ({jar['qty']:,} and {bird['qty']:,} units) were each cancelled within minutes and net to zero in their month.")
 bullet(f"**Hidden scope problems:** non-merchandise codes (e.g., Amazon fees up to £17,836 per line) were removed. The effect "
        f"of this choice and of the {R['duplicate_rows']:,} repeated rows was tested, and the conclusion did not change.")
